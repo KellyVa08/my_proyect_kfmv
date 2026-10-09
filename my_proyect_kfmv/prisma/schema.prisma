@@ -1,0 +1,57 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    name      String?
+    password  String
+    telephone String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    role      Role     @default(USER)
+    profile   Profile?
+    tenantId  Int
+    tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+enum Role {
+    USER
+    ADMIN
+}
+
+model Profile {
+    id     Int  @id @default(autoincrement())
+    userId Int  @unique
+    user   User @relation(fields: [userId], references: [id])
+}
+
+model Tenant {
+    id    Int    @id @default(autoincrement())
+    users User[]
+}
+
+model Post {
+    id       Int            @id @default(autoincrement())
+    category PostCategory[]
+}
+
+model Category {
+    id   Int            @id @default(autoincrement())
+    post PostCategory[]
+}
+
+model PostCategory {
+    postId     Int
+    categoryId Int
+    post       Post     @relation(fields: [postId], references: [id])
+    category   Category @relation(fields: [categoryId], references: [id])
+
+    @@id([postId, categoryId])
+}
